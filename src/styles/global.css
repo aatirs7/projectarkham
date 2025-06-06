@@ -6,4 +6,7 @@
   html {
     font-family: 'JetBrains Mono', monospace;
   }
+  body {
+    @apply overflow-x-hidden;
+  }
 }
