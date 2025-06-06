@@ -1,23 +1,16 @@
 ---
-
-import IntroOverlay from '../components/IntroOverlay.astro';
 import Navbar from '../components/Navbar.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 <BaseLayout>
-  <IntroOverlay />
   <Navbar />
   <main class="max-w-2xl mx-auto p-8 space-y-8">
-    <section class="border-b border-gray-800 pb-4">
-      <h1 class="text-2xl mb-2">This Week’s Focus</h1>
-      <p class="text-lg text-gray-300">Minimize distractions. Maximize presence. No wasted motion.</p>
-    </section>
     <section>
       <textarea
         id="log-text"
         class="w-full bg-transparent border-b border-gray-700 text-gray-100 placeholder-gray-500 p-2 mb-4 font-mono focus:outline-none"
         rows="4"
-        placeholder="Type your focus, reflection, or insight..."
+        placeholder="Type your log entry..."
       ></textarea>
       <button id="log-button" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded transition">Log Entry</button>
     </section>
@@ -25,15 +18,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <h2 class="mb-2 text-lg">Recent Logs</h2>
       <div id="recent-logs" class="font-mono text-gray-400 space-y-1"></div>
     </section>
-    <section class="text-center italic text-gray-400 pt-8">
-      “In the dark, I’ll find the power to rise.”
-    </section>
   </main>
   <script>
+    const key = 'projects';
     const textarea = document.getElementById('log-text');
     const logList = document.getElementById('recent-logs');
-    const loadLogs = () => JSON.parse(localStorage.getItem('arkhamLogs') || '[]');
-    const saveLogs = logs => localStorage.setItem('arkhamLogs', JSON.stringify(logs));
+    const loadLogs = () => JSON.parse(localStorage.getItem(key) || '[]');
+    const saveLogs = logs => localStorage.setItem(key, JSON.stringify(logs));
     const renderLogs = () => {
       const logs = loadLogs();
       logList.innerHTML = '';
