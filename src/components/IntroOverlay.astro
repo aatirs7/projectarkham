@@ -9,13 +9,20 @@
     'In the shadows of my own potential, the Arkham Project begins.',
     'Endure, master yourself, and rise.'
   ];
-  document.getElementById('intro-quote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
   const overlay = document.getElementById('intro-overlay');
-  const hide = () => {
-    if (!overlay) return;
-    overlay.classList.add('opacity-0', 'pointer-events-none');
-    setTimeout(() => overlay.remove(), 1000);
-  };
-  overlay.addEventListener('click', hide);
-  setTimeout(hide, 3000);
+  if (sessionStorage.getItem('arkhamIntroShown') === '1') {
+    overlay.remove();
+  } else {
+    document.getElementById('intro-quote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+    const hide = () => {
+      if (!overlay) return;
+      overlay.classList.add('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        overlay.remove();
+        sessionStorage.setItem('arkhamIntroShown', '1');
+      }, 1000);
+    };
+    overlay.addEventListener('click', hide);
+    window.addEventListener('arkham-access-granted', hide);
+  }
 </script>
