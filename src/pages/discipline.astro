@@ -1,0 +1,116 @@
+---
+import Navbar from '../components/Navbar.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const categories = [
+  { name: 'Spiritual', tasks: ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] },
+  { name: 'Physical', tasks: ['Workout', '10,000 steps', 'No sugar'] },
+  { name: 'Work', tasks: ['Submit report / progress', 'Focused work block'] },
+  { name: 'Other', tasks: ['Task 1', 'Task 2'] },
+];
+---
+<BaseLayout>
+  <Navbar />
+  <main class="p-4 sm:p-8 space-y-6 max-w-full overflow-x-auto">
+    <header class="space-y-1">
+      <h1 class="text-xl sm:text-2xl">Weekly Discipline Tracker</h1>
+      <div id="current-time" class="text-gray-400 text-sm"></div>
+      <div id="week-range" class="text-gray-400 text-sm"></div>
+    </header>
+    <table class="min-w-max text-sm border-collapse">
+      <thead>
+        <tr>
+          <th class="p-1 text-left">Task</th>
+          {Array.from({ length: 7 }).map((_, i) => (
+            <th class="p-1 text-center" id={`day-head-${i}`}></th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {categories.map(cat => (
+          <fragment>
+            <tr><th colspan="8" class="pt-4 pb-1 text-left text-gray-400">{cat.name}</th></tr>
+            {cat.tasks.map(task => (
+              <tr>
+                <td class="border-t border-gray-800 p-1 whitespace-nowrap">{task}</td>
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <td class="border-t border-gray-800 p-1">
+                    <div class="flex flex-col items-center space-y-1">
+                      <input type="checkbox" data-cat={cat.name} data-task={task} data-day-index={i} class="bg-black border border-gray-600" />
+                      <input type="text" data-cat={cat.name} data-task={task} data-day-index={i} class="bg-transparent border-b border-gray-700 w-full text-xs focus:outline-none" />
+                    </div>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </fragment>
+        ))}
+      </tbody>
+    </table>
+  </main>
+  <script>
+    const getMonday = date => {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(d.setDate(diff));
+    };
+    const monday = getMonday(new Date());
+    const days = Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      return d;
+    });
+    const fmt = d => d.toISOString().slice(0, 10);
+    const dayHeads = days.map((d, i) => document.getElementById(`day-head-${i}`));
+    dayHeads.forEach((th, i) => {
+      th.textContent = days[i].toLocaleDateString('en-US', { weekday: 'short' });
+    });
+    document.getElementById('week-range').textContent = `${monday.toLocaleDateString()} - ${days[6].toLocaleDateString()}`;
+    const timeEl = document.getElementById('current-time');
+    const updateTime = () => {
+      const now = new Date();
+      timeEl.textContent = now.toLocaleString();
+    };
+    updateTime();
+    setInterval(updateTime, 60000);
+    const keyFor = (cat, task, date) => `discipline::${cat}::${task}::${fmt(date)}`;
+    const cleanOld = () => {
+      const valid = days.map(fmt);
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('discipline::')) {
+          const parts = k.split('::');
+          const day = parts[3];
+          if (!valid.includes(day)) localStorage.removeItem(k);
+        }
+      });
+    };
+    cleanOld();
+    document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+      const cat = input.dataset.cat;
+      const task = input.dataset.task;
+      const day = days[input.dataset.dayIndex];
+      const key = keyFor(cat, task, day);
+      const saved = JSON.parse(localStorage.getItem(key) || '{}');
+      if (saved.checked) input.checked = true;
+      input.addEventListener('change', () => {
+        const existing = JSON.parse(localStorage.getItem(key) || '{}');
+        existing.checked = input.checked;
+        localStorage.setItem(key, JSON.stringify(existing));
+      });
+    });
+    document.querySelectorAll('input[type="text"]').forEach(input => {
+      const cat = input.dataset.cat;
+      const task = input.dataset.task;
+      const day = days[input.dataset.dayIndex];
+      const key = keyFor(cat, task, day);
+      const saved = JSON.parse(localStorage.getItem(key) || '{}');
+      if (saved.note) input.value = saved.note;
+      input.addEventListener('change', () => {
+        const existing = JSON.parse(localStorage.getItem(key) || '{}');
+        existing.note = input.value.trim();
+        localStorage.setItem(key, JSON.stringify(existing));
+      });
+    });
+  </script>
+</BaseLayout>
