@@ -7,25 +7,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <BaseLayout>
   <IntroOverlay />
   <Navbar />
-  <main class="max-w-2xl mx-auto p-8 space-y-8">
+  <main class="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
     <section class="border-b border-gray-800 pb-4">
-      <h1 class="text-2xl mb-2">This Week’s Focus</h1>
-      <p class="text-lg text-gray-300">Minimize distractions. Maximize presence. No wasted motion.</p>
+      <h1 class="text-lg sm:text-xl mb-2">This Week’s Focus</h1>
+      <p class="text-sm sm:text-base text-gray-300">Minimize distractions. Maximize presence. No wasted motion.</p>
     </section>
     <section>
       <textarea
         id="log-text"
-        class="w-full bg-transparent border-b border-gray-700 text-gray-100 placeholder-gray-500 p-2 mb-4 font-mono focus:outline-none"
+        class="w-full bg-transparent border-b border-gray-700 text-gray-100 placeholder-gray-500 p-2 sm:p-3 text-sm sm:text-base mb-4 font-mono focus:outline-none resize-none"
         rows="4"
         placeholder="Type your focus, reflection, or insight..."
       ></textarea>
-      <button id="log-button" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded transition">Log Entry</button>
+      <button id="log-button" class="bg-gray-700 hover:bg-gray-600 text-sm sm:text-base px-2 py-1 sm:px-3 sm:py-2 rounded">Log Entry</button>
     </section>
     <section>
-      <h2 class="mb-2 text-lg">Recent Logs</h2>
-      <div id="recent-logs" class="font-mono text-gray-400 space-y-1"></div>
+      <h2 class="mb-2 text-sm sm:text-lg">Recent Logs</h2>
+      <div id="recent-logs" class="font-mono text-gray-400 space-y-2 text-sm sm:text-base"></div>
     </section>
-    <section class="text-center italic text-gray-400 pt-8">
+    <section class="text-center italic text-gray-400 pt-8 text-sm sm:text-base">
       “In the dark, I’ll find the power to rise.”
     </section>
   </main>
