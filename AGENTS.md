@@ -115,23 +115,6 @@ No wasted movement.
 No visual noise.
 Think Arkham. Think control. Think clarity.
 
-File Ownership Summary
-File	Rules
-index.astro	Do not modify unless homepage updates are part of the task
-Navbar.astro	Edit only when instructed; preserve structure
-global.css, tailwind.config.js	Only modify for font, spacing, or mode changes
-/layouts/BaseLayout.astro	Extend only via components unless layout work is assigned
 
-Future Modules (Do not build unless instructed)
-/daily-log — Log daily reflections & thoughts
 
-/fitness — Log workouts, track weight
-
-/projects — Archive enrichment projects
-
-/review — Monthly or weekly reflections
-
-/goals — Short-/long-term objective tracker
-
-/terminal — Experimental CLI-like interface for logging & querying
 
