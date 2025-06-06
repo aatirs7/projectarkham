@@ -1,0 +1,21 @@
+<div id="intro-overlay" class="fixed inset-0 bg-black flex flex-col items-center justify-center text-gray-300 text-center font-jetbrains transition-opacity duration-1000">
+  <h1 class="text-4xl mb-4">Project Arkham</h1>
+  <p id="intro-quote" class="italic"></p>
+</div>
+<script>
+  const quotes = [
+    'The training is nothing. The will is everything. \u2013 Ra\u2019s al Ghul',
+    'I have to become more. \u2013 Bruce Wayne',
+    'In the shadows of my own potential, the Arkham Project begins.',
+    'Endure, master yourself, and rise.'
+  ];
+  document.getElementById('intro-quote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+  const overlay = document.getElementById('intro-overlay');
+  const hide = () => {
+    if (!overlay) return;
+    overlay.classList.add('opacity-0', 'pointer-events-none');
+    setTimeout(() => overlay.remove(), 1000);
+  };
+  overlay.addEventListener('click', hide);
+  setTimeout(hide, 3000);
+</script>

@@ -1,0 +1,51 @@
+---
+import Navbar from '../components/Navbar.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout>
+  <Navbar />
+  <main class="max-w-2xl mx-auto p-8 space-y-8">
+    <section>
+      <textarea
+        id="log-text"
+        class="w-full bg-transparent border-b border-gray-700 text-gray-100 placeholder-gray-500 p-2 mb-4 font-mono focus:outline-none"
+        rows="4"
+        placeholder="Type your log entry..."
+      ></textarea>
+      <button id="log-button" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded transition">Log Entry</button>
+    </section>
+    <section>
+      <h2 class="mb-2 text-lg">Recent Logs</h2>
+      <div id="recent-logs" class="font-mono text-gray-400 space-y-1"></div>
+    </section>
+  </main>
+  <script>
+    const key = 'daily-log';
+    const textarea = document.getElementById('log-text');
+    const logList = document.getElementById('recent-logs');
+    const loadLogs = () => JSON.parse(localStorage.getItem(key) || '[]');
+    const saveLogs = logs => localStorage.setItem(key, JSON.stringify(logs));
+    const renderLogs = () => {
+      const logs = loadLogs();
+      logList.innerHTML = '';
+      logs
+        .slice(-5)
+        .reverse()
+        .forEach(({ text, time }) => {
+          const div = document.createElement('div');
+          div.textContent = `[${new Date(time).toLocaleString()}] ${text}`;
+          logList.appendChild(div);
+        });
+    };
+    document.getElementById('log-button').addEventListener('click', () => {
+      const text = textarea.value.trim();
+      if (!text) return;
+      const logs = loadLogs();
+      logs.push({ text, time: Date.now() });
+      saveLogs(logs);
+      textarea.value = '';
+      renderLogs();
+    });
+    renderLogs();
+  </script>
+</BaseLayout>
