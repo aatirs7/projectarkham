@@ -27,4 +27,7 @@
   .animate-shake {
     animation: shake 0.3s;
   }
+  body {
+    @apply overflow-x-hidden;
+  }
 }
