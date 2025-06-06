@@ -17,5 +17,5 @@
     setTimeout(() => overlay.remove(), 1000);
   };
   overlay.addEventListener('click', hide);
-  setTimeout(hide, 3000);
+  window.addEventListener('arkham-access-granted', hide);
 </script>
