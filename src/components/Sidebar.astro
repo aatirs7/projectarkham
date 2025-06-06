@@ -1,0 +1,26 @@
+---
+---
+<aside class="hidden lg:flex flex-col justify-between w-40 p-4 border-r border-gray-800 text-gray-400 text-xs font-jetbrains">
+  <div>
+    <div id="sidebar-time" class="text-gray-100"></div>
+    <div id="sidebar-date"></div>
+    <nav class="mt-6 flex flex-col space-y-2">
+      <a href="/" class="hover:text-gray-200">Home</a>
+      <a href="/daily-log" class="hover:text-gray-200">Daily Log</a>
+      <a href="/fitness" class="hover:text-gray-200">Fitness</a>
+      <a href="/projects" class="hover:text-gray-200">Projects</a>
+      <a href="/reviews" class="hover:text-gray-200">Reviews</a>
+    </nav>
+  </div>
+</aside>
+<script>
+  const timeEl = document.getElementById('sidebar-time');
+  const dateEl = document.getElementById('sidebar-date');
+  function updateClock() {
+    const now = new Date();
+    timeEl.textContent = now.toLocaleTimeString();
+    dateEl.textContent = now.toLocaleDateString();
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+</script>
