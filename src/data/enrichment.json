@@ -1,0 +1,26 @@
+[
+  {
+    "slug": "journey-inward",
+    "title": "Journey Inward",
+    "description": "Exploring self-awareness and introspection",
+    "focus": "Cultivate a disciplined daily practice of reflection through structured prompts.",
+    "weeks": [
+      "N/A",
+      "Ego and Identity",
+      "Shadow Work",
+      "Purpose and Vision"
+    ]
+  },
+  {
+    "slug": "stoic-living",
+    "title": "Stoic Living",
+    "description": "Applying stoic principles to modern life",
+    "focus": "Integrate stoic principles to strengthen resilience and clarity.",
+    "weeks": [
+      "N/A",
+      "Virtue and Discipline",
+      "Contemplation of Mortality",
+      "Emotional Regulation"
+    ]
+  }
+]
