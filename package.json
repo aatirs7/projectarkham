@@ -6,6 +6,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "test": "echo \"No tests specified\""
+
   },
   "dependencies": {
     "@astrojs/tailwind": "^6.0.2",
