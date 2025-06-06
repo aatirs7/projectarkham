@@ -1,0 +1,60 @@
+---
+import IntroOverlay from '../components/IntroOverlay.astro';
+import Navbar from '../components/Navbar.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout>
+  <IntroOverlay />
+  <Navbar />
+  <main class="max-w-2xl mx-auto p-8 space-y-8">
+    <section class="border-b border-gray-800 pb-4">
+      <h1 class="text-2xl mb-2">This Week’s Focus</h1>
+      <p class="text-lg text-gray-300">Minimize distractions. Maximize presence. No wasted motion.</p>
+    </section>
+    <section>
+      <textarea id="log-text" class="w-full bg-gray-900 text-gray-200 p-3 rounded mb-2 font-mono" rows="4" placeholder="Type your focus, reflection, or insight..."></textarea>
+      <select id="log-category" class="w-full bg-gray-800 text-gray-200 p-2 rounded mb-4">
+        <option>Fitness</option>
+        <option>Thoughts</option>
+        <option>Enrichment</option>
+        <option>Discipline</option>
+        <option>General</option>
+      </select>
+      <button id="log-button" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded transition">Log Entry</button>
+    </section>
+    <section>
+      <h2 class="mb-2 text-lg">Recent Logs</h2>
+      <div id="recent-logs" class="font-mono text-gray-400 space-y-1"></div>
+    </section>
+    <section class="text-center italic text-gray-400 pt-8">
+      “In the dark, I’ll find the power to rise.”
+    </section>
+  </main>
+  <script>
+    const textarea = document.getElementById('log-text');
+    const category = document.getElementById('log-category');
+    const logList = document.getElementById('recent-logs');
+    const loadLogs = () => JSON.parse(localStorage.getItem('arkhamLogs') || '[]');
+    const saveLogs = logs => localStorage.setItem('arkhamLogs', JSON.stringify(logs));
+    const renderLogs = () => {
+      const logs = loadLogs();
+      logList.innerHTML = '';
+      logs.slice(-5).reverse().forEach(({ text, category, time }) => {
+        const div = document.createElement('div');
+        div.textContent = `[${new Date(time).toLocaleString()}] (${category}) ${text}`;
+        div.className = 'transition-opacity';
+        logList.appendChild(div);
+      });
+    };
+    document.getElementById('log-button').addEventListener('click', () => {
+      const text = textarea.value.trim();
+      if (!text) return;
+      const logs = loadLogs();
+      logs.push({ text, category: category.value, time: Date.now() });
+      saveLogs(logs);
+      textarea.value = '';
+      renderLogs();
+    });
+    renderLogs();
+  </script>
+</BaseLayout>
