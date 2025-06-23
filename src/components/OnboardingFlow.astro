@@ -7,18 +7,23 @@
   <div id="tip-one" class="onboard-screen hidden opacity-0">
     <h2 class="text-white mb-4">1. Morning Priming</h2>
     <p class="text-white max-w-xl mb-6">Sit still, close your eyes, visualize your goals already achieved. Feel the emotions. Set the tone for the day.</p>
-    <div id="priming-complete" data-action="next" class="complete text-white text-sm cursor-pointer">Complete &rarr;</div>
   </div>
   <div id="tip-two" class="onboard-screen hidden opacity-0">
     <h2 class="text-white mb-4">2. Mental Declutter</h2>
     <p class="text-white max-w-xl mb-6">Journal for 5 minutes: dump your thoughts, fears, or ideas. It clears the fog so you can think clearly.</p>
-    <input id="journal-input" type="text" class="bg-black text-white caret-white outline-none border-none w-full max-w-xl text-center" />
-    <div id="journal-complete" data-action="next" class="complete text-white text-sm cursor-pointer">Complete &rarr;</div>
+    <textarea id="journal-input" class="bg-transparent text-white caret-white outline-none border-none w-full h-full resize-none"></textarea>
+    <div id="journal-timer" class="absolute top-2 right-2 text-white text-sm">05:00</div>
+    <div id="journal-continue" data-action="next" class="complete text-white text-sm cursor-pointer hidden">Continue &rarr;</div>
   </div>
   <div id="tip-three" class="onboard-screen hidden opacity-0">
     <h2 class="text-white mb-4">3. Self-Talk Reset</h2>
     <p class="text-white max-w-xl mb-6">Say 3 powerful affirmations out loud. Your brain believes what it hears often—make sure it&rsquo;s something strong.</p>
-    <div id="selftalk-complete" data-action="next" class="complete text-white text-sm cursor-pointer">Complete &rarr;</div>
+  </div>
+  <div id="tip-four" class="onboard-screen hidden opacity-0">
+    <h2 class="text-white mb-4">4. Deep Breathing + Quran</h2>
+    <p class="text-white max-w-xl mb-6">5 minutes of conscious breathing calms your nervous system, reduces anxiety, and resets your focus. Listen to Quran while you breathe.</p>
+    <div id="breath-timer" class="absolute top-2 right-2 text-white text-sm">05:00</div>
+    <div id="breath-continue" data-action="next" class="complete text-white text-sm cursor-pointer hidden">Continue &rarr;</div>
   </div>
 </div>
 <style>
@@ -34,13 +39,14 @@
     background: #000;
     color: #fff;
     padding: 1.5rem;
-    transition: opacity 0.5s;
+    transition: opacity 0.3s;
   }
   #onboarding .complete {
     position: absolute;
     bottom: 1rem;
     right: 1rem;
   }
+  textarea { background: transparent; }
 </style>
 <script>
 (function(){
@@ -55,6 +61,7 @@
   ];
   let step = -1;
   let timer;
+  let countdown;
 
   const show = i => {
     const s = screens[i];
@@ -64,24 +71,26 @@
   const hide = i => {
     const s = screens[i];
     s.classList.add('opacity-0');
-    setTimeout(() => s.classList.add('hidden'), 500);
+    setTimeout(() => s.classList.add('hidden'), 300);
   };
 
-  const next = () => {
-    if(step >= 0) hide(step);
-    step++;
-    if(step < screens.length){
-      show(step);
-      if(step === 0){
-        onboarding.querySelector('#quote-text').textContent = quotes[Math.floor(Math.random()*quotes.length)];
-        timer = setTimeout(next, 2000);
+  const format = secs => {
+    const m = String(Math.floor(secs/60)).padStart(2,'0');
+    const s = String(secs%60).padStart(2,'0');
+    return m+':'+s;
+  };
+
+  const startCountdown = (el, cb) => {
+    let secs = 300;
+    el.textContent = format(secs);
+    countdown = setInterval(() => {
+      secs--;
+      el.textContent = format(secs);
+      if(secs <= 0){
+        clearInterval(countdown);
+        cb();
       }
-      if(step === 2){
-        document.getElementById('journal-input').focus();
-      }
-    } else {
-      onboarding.remove();
-    }
+    },1000);
   };
 
   const saveJournal = () => {
@@ -93,6 +102,34 @@
     localStorage.setItem(key, JSON.stringify(data));
   };
 
+  const next = () => {
+    if(step >= 0) hide(step);
+    step++;
+    if(step < screens.length){
+      show(step);
+      if(step === 0){
+        document.getElementById('quote-text').textContent = quotes[Math.floor(Math.random()*quotes.length)];
+        timer = setTimeout(next, 2000);
+      } else if(step === 1){
+        // tip one
+      } else if(step === 2){
+        document.getElementById('journal-input').focus();
+        startCountdown(document.getElementById('journal-timer'), () => {
+          document.getElementById('journal-continue').classList.remove('hidden');
+        });
+      } else if(step === 3){
+        // self talk
+      } else if(step === 4){
+        startCountdown(document.getElementById('breath-timer'), () => {
+          document.getElementById('breath-continue').classList.remove('hidden');
+        });
+      }
+    } else {
+      onboarding.remove();
+      window.dispatchEvent(new CustomEvent('arkham-onboarding-complete'));
+    }
+  };
+
   onboarding.addEventListener('click', e => {
     if(e.target.dataset.action === 'next'){
       if(step === 2) saveJournal();
@@ -101,16 +138,17 @@
   });
 
   onboarding.addEventListener('keydown', e => {
+    if(step === 2) return; // allow text input newlines
     if(e.key === 'Enter'){
       e.preventDefault();
       if(step === 0){
         clearTimeout(timer); next();
       } else if(step === 1){
         next();
-      } else if(step === 2){
-        saveJournal(); next();
       } else if(step === 3){
         next();
+      } else if(step === 4){
+        // ignore enter until countdown over
       }
     }
   });
