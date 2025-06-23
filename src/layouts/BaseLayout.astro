@@ -15,6 +15,13 @@ import PasswordGate from '../components/PasswordGate.astro';
   <body class="bg-black text-gray-100 font-jetbrains min-h-screen overflow-x-hidden">
     <PasswordGate />
     <OnboardingFlow />
-    <slot />
+    <div id="main-content" class="hidden">
+      <slot />
+    </div>
+    <script>
+      window.addEventListener('arkham-onboarding-complete', () => {
+        document.getElementById('main-content')?.classList.remove('hidden');
+      });
+    </script>
   </body>
 </html>
