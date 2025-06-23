@@ -1,26 +1,24 @@
 ---
 ---
-<div id="onboarding">
+<div id="onboarding" class="font-jetbrains">
   <div id="onboard-quote" class="onboard-screen hidden opacity-0">
-    <p id="quote-text" class="italic mb-4"></p>
-    <button id="quote-next" class="neon-border px-3 py-1 hover:neon-glow" data-action="next">Continue</button>
+    <p id="quote-text" class="text-white text-lg"></p>
   </div>
   <div id="tip-one" class="onboard-screen hidden opacity-0">
-    <h2 class="text-xl mb-4">Morning Priming</h2>
-    <p class="mb-6">Sit still, close your eyes, and visualize your goals already achieved. Feel the emotions. Set the tone for the day.</p>
-    <button id="priming-complete" class="neon-border px-3 py-1 hover:neon-glow" data-action="next">Complete</button>
+    <h2 class="text-white mb-4">1. Morning Priming</h2>
+    <p class="text-white max-w-xl mb-6">Sit still, close your eyes, visualize your goals already achieved. Feel the emotions. Set the tone for the day.</p>
+    <div id="priming-complete" data-action="next" class="complete text-white text-sm cursor-pointer">Complete &rarr;</div>
   </div>
   <div id="tip-two" class="onboard-screen hidden opacity-0">
-    <h2 class="text-xl mb-4">Mental Declutter</h2>
-    <p class="mb-4">Journal for 5 minutes: dump your thoughts, fears, or ideas. It clears the fog so you can think clearly.</p>
-    <textarea id="journal-input" class="bg-transparent neon-border p-2 w-full max-w-md h-32 text-gray-100 focus:outline-none caret-white"></textarea>
-    <button id="journal-log" class="neon-border px-3 py-1 hover:neon-glow mt-4">Log</button>
-    <button id="journal-complete" class="neon-border px-3 py-1 hover:neon-glow mt-4 hidden" data-action="next">Complete</button>
+    <h2 class="text-white mb-4">2. Mental Declutter</h2>
+    <p class="text-white max-w-xl mb-6">Journal for 5 minutes: dump your thoughts, fears, or ideas. It clears the fog so you can think clearly.</p>
+    <input id="journal-input" type="text" class="bg-black text-white caret-white outline-none border-none w-full max-w-xl text-center" />
+    <div id="journal-complete" data-action="next" class="complete text-white text-sm cursor-pointer">Complete &rarr;</div>
   </div>
   <div id="tip-three" class="onboard-screen hidden opacity-0">
-    <h2 class="text-xl mb-4">Self-Talk Reset</h2>
-    <p class="mb-6">Say 3 powerful affirmations out loud. Your brain believes what it hears often—make sure it’s something strong.</p>
-    <button id="selftalk-complete" class="neon-border px-3 py-1 hover:neon-glow" data-action="next">Complete</button>
+    <h2 class="text-white mb-4">3. Self-Talk Reset</h2>
+    <p class="text-white max-w-xl mb-6">Say 3 powerful affirmations out loud. Your brain believes what it hears often—make sure it&rsquo;s something strong.</p>
+    <div id="selftalk-complete" data-action="next" class="complete text-white text-sm cursor-pointer">Complete &rarr;</div>
   </div>
 </div>
 <style>
@@ -33,66 +31,91 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    background: black;
-    color: #d1d5db;
-    padding: 1rem;
+    background: #000;
+    color: #fff;
+    padding: 1.5rem;
     transition: opacity 0.5s;
+  }
+  #onboarding .complete {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
   }
 </style>
 <script>
-  (function(){
-    const onboarding=document.getElementById('onboarding');
-    if(!onboarding) return;
-    const screens=Array.from(onboarding.querySelectorAll('.onboard-screen'));
-    const quotes=[
-      'Discipline is the bridge between goals and accomplishment.',
-      'Suffer the pain of discipline or suffer the pain of regret.',
-      'We are what we repeatedly do.',
-      'The only easy day was yesterday.'
-    ];
-    let step=-1; let timer; let journalLogged=false;
-    const show=i=>{const s=screens[i];s.classList.remove('hidden');setTimeout(()=>s.classList.remove('opacity-0'),20);};
-    const hide=i=>{const s=screens[i];s.classList.add('opacity-0');setTimeout(()=>s.classList.add('hidden'),500);};
-    const start=()=>next();
-    const next=()=>{
-      if(step>=0) hide(step);
-      step++;
-      if(step<screens.length){
-        show(step);
-        if(step===0){
-          onboarding.querySelector('#quote-text').textContent=quotes[Math.floor(Math.random()*quotes.length)];
-          timer=setTimeout(next,5000);
-        }
-      }else{
-        onboarding.remove();
+(function(){
+  const onboarding = document.getElementById('onboarding');
+  if(!onboarding) return;
+  const screens = Array.from(onboarding.querySelectorAll('.onboard-screen'));
+  const quotes = [
+    'Discipline is the bridge between goals and accomplishment.',
+    'Suffer the pain of discipline or suffer the pain of regret.',
+    'We are what we repeatedly do.',
+    'The only easy day was yesterday.'
+  ];
+  let step = -1;
+  let timer;
+
+  const show = i => {
+    const s = screens[i];
+    s.classList.remove('hidden');
+    setTimeout(() => s.classList.remove('opacity-0'), 20);
+  };
+  const hide = i => {
+    const s = screens[i];
+    s.classList.add('opacity-0');
+    setTimeout(() => s.classList.add('hidden'), 500);
+  };
+
+  const next = () => {
+    if(step >= 0) hide(step);
+    step++;
+    if(step < screens.length){
+      show(step);
+      if(step === 0){
+        onboarding.querySelector('#quote-text').textContent = quotes[Math.floor(Math.random()*quotes.length)];
+        timer = setTimeout(next, 2000);
       }
-    };
-    const saveJournal=()=>{
-      if(journalLogged) return; journalLogged=true;
-      const txt=document.getElementById('journal-input').value.trim();
-      if(!txt) return;
-      const key='arkhamJournalEntries';
-      const data=JSON.parse(localStorage.getItem(key)||'[]');
-      data.push({id:Date.now(),date:new Date().toISOString().slice(0,10),text:txt});
-      localStorage.setItem(key,JSON.stringify(data));
-    };
-    document.getElementById('quote-next').addEventListener('click',()=>{clearTimeout(timer);next();});
-    document.getElementById('priming-complete').addEventListener('click',next);
-    const journalInput=document.getElementById('journal-input');
-    const showJournalComplete=()=>{
-      document.getElementById('journal-log').classList.add('hidden');
-      document.getElementById('journal-complete').classList.remove('hidden');
-    };
-    let typingTimer;
-    journalInput.addEventListener('input',()=>{
-      if(journalInput.value.trim()){
-        clearTimeout(typingTimer); typingTimer=setTimeout(showJournalComplete,1000);
+      if(step === 2){
+        document.getElementById('journal-input').focus();
       }
-    });
-    document.getElementById('journal-log').addEventListener('click',()=>{saveJournal();showJournalComplete();});
-    document.getElementById('journal-complete').addEventListener('click',()=>{saveJournal();next();});
-    document.getElementById('selftalk-complete').addEventListener('click',next);
-    window.addEventListener('arkham-access-granted', start);
-    if(sessionStorage.getItem('arkhamAccess')==='1'){start();}
-  })();
+    } else {
+      onboarding.remove();
+    }
+  };
+
+  const saveJournal = () => {
+    const txt = document.getElementById('journal-input').value.trim();
+    if(!txt) return;
+    const key = 'arkhamJournalEntries';
+    const data = JSON.parse(localStorage.getItem(key) || '[]');
+    data.push({id: Date.now(), date: new Date().toISOString().slice(0,10), text: txt});
+    localStorage.setItem(key, JSON.stringify(data));
+  };
+
+  onboarding.addEventListener('click', e => {
+    if(e.target.dataset.action === 'next'){
+      if(step === 2) saveJournal();
+      next();
+    }
+  });
+
+  onboarding.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      if(step === 0){
+        clearTimeout(timer); next();
+      } else if(step === 1){
+        next();
+      } else if(step === 2){
+        saveJournal(); next();
+      } else if(step === 3){
+        next();
+      }
+    }
+  });
+
+  window.addEventListener('arkham-access-granted', next);
+  if(sessionStorage.getItem('arkhamAccess') === '1') next();
+})();
 </script>
