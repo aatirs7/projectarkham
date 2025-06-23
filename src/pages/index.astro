@@ -1,58 +1,61 @@
 ---
-
 import Navbar from '../components/Navbar.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 <BaseLayout>
   <Navbar />
-  <main class="max-w-2xl mx-auto p-4 sm:p-8 space-y-8">
-    <section class="border-b border-gray-800 pb-4">
-      <h1 class="text-xl sm:text-2xl mb-2">This Week’s Focus</h1>
-      <p class="text-base sm:text-lg text-gray-300">Minimize distractions. Maximize presence. No wasted motion.</p>
+  <main class="max-w-4xl mx-auto p-4 sm:p-8 grid gap-6 sm:grid-cols-10">
+    <section class="sm:col-span-6 space-y-4">
+      <h1 class="text-xl sm:text-2xl">Mission of the Day</h1>
+      <input
+        id="mission-input"
+        type="text"
+        class="w-full bg-transparent border-b border-gray-700 focus:outline-none neon-border p-2"
+        placeholder="Set your mission"
+      />
+      <p id="daily-quote" class="italic text-gray-400"></p>
     </section>
-    <section>
-      <textarea
-        id="log-text"
-        class="w-full bg-transparent border-b border-gray-700 text-gray-100 placeholder-gray-500 p-2 sm:p-3 mb-4 font-mono focus:outline-none"
-        rows="4"
-        placeholder="Type your focus, reflection, or insight..."
-      ></textarea>
-      <button id="log-button" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 sm:px-4 sm:py-2 rounded transition">Log Entry</button>
-    </section>
-    <section>
-      <h2 class="mb-2 text-base sm:text-lg">Recent Logs</h2>
-      <div id="recent-logs" class="font-mono text-gray-400 space-y-1"></div>
-    </section>
-    <section class="text-center italic text-gray-400 pt-8 text-sm sm:text-base">
-      “In the dark, I’ll find the power to rise.”
+    <section class="sm:col-span-4 space-y-4 neon-border p-4">
+      <h2 class="text-lg">Aatir 2.0 vs You</h2>
+      <div class="flex items-end justify-around h-32">
+        <div class="flex flex-col items-center w-8">
+          <div id="you-bar" class="bg-cyan-500 w-full" style="height:0"></div>
+          <span class="mt-2 text-xs">You</span>
+        </div>
+        <div class="flex flex-col items-center w-8">
+          <div id="aatir-bar" class="bg-gray-500 w-full" style="height:0"></div>
+          <span class="mt-2 text-xs">Aatir 2.0</span>
+        </div>
+      </div>
+      <p id="summary" class="text-gray-400 text-sm"></p>
     </section>
   </main>
   <script>
-    const textarea = document.getElementById('log-text');
-    const logList = document.getElementById('recent-logs');
-    const loadLogs = () => JSON.parse(localStorage.getItem('arkhamLogs') || '[]');
-    const saveLogs = logs => localStorage.setItem('arkhamLogs', JSON.stringify(logs));
-    const renderLogs = () => {
-      const logs = loadLogs();
-      logList.innerHTML = '';
-      logs
-        .slice(-5)
-        .reverse()
-        .forEach(({ text, time }) => {
-          const div = document.createElement('div');
-          div.textContent = `[${new Date(time).toLocaleString()}] ${text}`;
-          logList.appendChild(div);
-        });
-    };
-    document.getElementById('log-button').addEventListener('click', () => {
-      const text = textarea.value.trim();
-      if (!text) return;
-      const logs = loadLogs();
-      logs.push({ text, time: Date.now() });
-      saveLogs(logs);
-      textarea.value = '';
-      renderLogs();
+    const missionKey = 'arkhamMission';
+    const missionInput = document.getElementById('mission-input');
+    missionInput.value = localStorage.getItem(missionKey) || '';
+    missionInput.addEventListener('change', () => {
+      localStorage.setItem(missionKey, missionInput.value.trim());
     });
-    renderLogs();
+    const quotes = [
+      'Endure, master yourself, and rise.',
+      'The training is nothing. The will is everything.',
+      'In darkness we find clarity.'
+    ];
+    document.getElementById('daily-quote').textContent = quotes[Math.floor(Math.random()*quotes.length)];
+    const today = new Date().toISOString().slice(0,10);
+    const loadLogs = () => JSON.parse(localStorage.getItem('arkhamDailyLogs') || '[]');
+    const logsToday = loadLogs().filter(l => l.date === today);
+    const target = 5;
+    const youPct = Math.min(100, Math.round((logsToday.length/target)*100));
+    document.getElementById('you-bar').style.height = youPct + '%';
+    const aKey = 'aatirPct-' + today;
+    let aPct = localStorage.getItem(aKey);
+    if(!aPct){
+      aPct = (80 + Math.floor(Math.random()*21)).toString();
+      localStorage.setItem(aKey, aPct);
+    }
+    document.getElementById('aatir-bar').style.height = aPct + '%';
+    document.getElementById('summary').textContent = 'Today, you held the line — but he woke up before Fajr.';
   </script>
 </BaseLayout>
