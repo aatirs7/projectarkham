@@ -1,181 +1,82 @@
 ---
 import Navbar from '../components/Navbar.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-const categories = [
-  { name: 'Spiritual', tasks: ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] },
-  { name: 'Physical', tasks: ['Workout', '10,000 steps', 'No sugar'] },
-  { name: 'Work', tasks: ['Submit report / progress', 'Focused work block'] },
-];
 ---
 <BaseLayout>
   <Navbar />
-  <main class="p-4 sm:p-8 space-y-6 max-w-2xl mx-auto">
-    <header class="space-y-2">
-      <h1 class="text-xl sm:text-2xl">Daily Log</h1>
-      <div class="flex items-center space-x-3 text-sm text-gray-400">
-        <div class="flex items-center space-x-1">
-          <button id="daily-btn" class="px-2 py-1 border border-gray-700" aria-pressed="true">Daily</button>
-          <button id="weekly-btn" class="px-2 py-1 border border-gray-700">Weekly</button>
-        </div>
-      </div>
-    </header>
-    <div id="category-buttons" class="flex space-x-2 text-sm"></div>
-    <div id="task-container" class="space-y-4"></div>
+  <main class="max-w-3xl mx-auto p-4 sm:p-8 space-y-6">
+    <div class="flex space-x-2">
+      <select id="log-category" class="bg-black neon-border p-1 text-sm">
+        <option value="Spiritual">Spiritual</option>
+        <option value="Physical">Physical</option>
+        <option value="Work">Work</option>
+      </select>
+      <input id="log-text" type="text" placeholder="New entry" class="flex-1 bg-transparent border-b border-gray-700 focus:outline-none" />
+      <button id="add-log" class="px-3 py-1 neon-border hover:neon-glow">Add</button>
+    </div>
+    <div id="filter-buttons" class="flex space-x-2 text-sm"></div>
+    <div id="logs" class="space-y-2 max-h-[60vh] overflow-y-auto"></div>
   </main>
   <script>
-    const categories = JSON.parse(`\
-${JSON.stringify([{name:'Spiritual',tasks:['Fajr','Dhuhr','Asr','Maghrib','Isha']},{name:'Physical',tasks:['Workout','10,000 steps','No sugar']},{name:'Work',tasks:['Submit report / progress','Focused work block']}])}
-    `);
-    const fmt = d => d.toISOString().slice(0,10);
-    const getMonday = date => { const d=new Date(date); const day=d.getDay(); const diff=d.getDate()-day+(day===0?-6:1); return new Date(d.setDate(diff)); };
-    const monday = getMonday(new Date());
-    const days = Array.from({length:7}).map((_,i)=>{ const d=new Date(monday); d.setDate(monday.getDate()+i); return d; });
-    const todayStr = fmt(new Date());
-    const validDays = days.map(fmt);
-    const cleanOld = () => {
-      Object.keys(localStorage).forEach(k=>{
-        if(k.startsWith('daily-log::')){
-          const day = k.split('::')[3];
-          if(!validDays.includes(day)) localStorage.removeItem(k);
-        }
-      });
-    };
-    cleanOld();
-
-    let view = 'daily';
-    let currentCat = null;
-    const catButtons = document.getElementById('category-buttons');
-    const taskContainer = document.getElementById('task-container');
-    const dailyBtn = document.getElementById('daily-btn');
-    const weeklyBtn = document.getElementById('weekly-btn');
-
-    const renderCategories = () => {
-      catButtons.innerHTML='';
-      categories.forEach((cat,idx)=>{
+    const filters = ['All','Spiritual','Physical','Work'];
+    const filterContainer = document.getElementById('filter-buttons');
+    const logsEl = document.getElementById('logs');
+    const catSelect = document.getElementById('log-category');
+    const textInput = document.getElementById('log-text');
+    const logKey = 'arkhamDailyLogs';
+    let activeFilter = 'All';
+    const loadLogs = () => JSON.parse(localStorage.getItem(logKey)||'[]');
+    const saveLogs = logs => localStorage.setItem(logKey,JSON.stringify(logs));
+    const renderFilters = () => {
+      filterContainer.innerHTML='';
+      filters.forEach(f=>{
         const btn=document.createElement('button');
-        btn.textContent=cat.name;
-        btn.className='px-2 py-1 border border-gray-700 text-gray-400';
-        btn.dataset.index=idx;
-        btn.addEventListener('click',()=>{ currentCat=idx; renderTasks(); updateCatStyles(); });
-        catButtons.appendChild(btn);
+        btn.textContent=f;
+        btn.className='px-2 py-1 neon-border ' + (activeFilter===f? 'text-cyan-400':'text-gray-400');
+        btn.addEventListener('click',()=>{activeFilter=f; renderFilters(); renderLogs();});
+        filterContainer.appendChild(btn);
       });
     };
-
-    const updateCatStyles = () => {
-      catButtons.querySelectorAll('button').forEach(btn=>{
-        if(Number(btn.dataset.index)===currentCat){
-          btn.classList.add('text-gray-100');
-        } else {
-          btn.classList.remove('text-gray-100');
-        }
+    const renderLogs = () => {
+      logsEl.innerHTML='';
+      const today = new Date().toISOString().slice(0,10);
+      let logs = loadLogs().filter(l=>l.date===today);
+      if(activeFilter!=='All') logs = logs.filter(l=>l.category===activeFilter);
+      logs.forEach(log=>{
+        const div=document.createElement('div');
+        div.className='flex justify-between items-center neon-border p-2';
+        const info=document.createElement('div');
+        const time=document.createElement('span');
+        time.className='text-xs text-gray-500 mr-2';
+        time.textContent=new Date(log.time).toLocaleTimeString();
+        const badge=document.createElement('span');
+        badge.className='text-xs bg-gray-800 px-1 mr-2';
+        badge.textContent=log.category;
+        const text=document.createElement('span');
+        text.textContent=log.text;
+        info.appendChild(time); info.appendChild(badge); info.appendChild(text);
+        const del=document.createElement('button');
+        del.innerHTML='\u2715';
+        del.className='text-gray-500 hidden';
+        div.addEventListener('mouseover',()=>del.classList.remove('hidden'));
+        div.addEventListener('mouseout',()=>del.classList.add('hidden'));
+        del.addEventListener('click',()=>{removeLog(log.id);});
+        div.appendChild(info); div.appendChild(del);
+        logsEl.appendChild(div);
       });
     };
-
-    const keyFor = (cat, task, date) => `daily-log::${cat}::${task}::${date}`;
-
-    const renderTasks = () => {
-      taskContainer.innerHTML='';
-      if(currentCat===null) return;
-      const cat = categories[currentCat];
-      if(view==='daily'){
-        const today=fmt(new Date());
-        cat.tasks.forEach(task=>{
-          const div=document.createElement('div');
-          div.className='flex items-center space-x-2';
-          const check=document.createElement('input');
-          check.type='checkbox';
-          check.className='h-4 w-4 border border-gray-600 rounded bg-black';
-          const label=document.createElement('span');
-          label.textContent=task;
-          label.className='flex-1';
-          const note=document.createElement('input');
-          note.type='text';
-          note.placeholder='note';
-          note.className='bg-transparent text-gray-400 text-xs border-b border-gray-700 flex-1 focus:outline-none';
-          const key=keyFor(cat.name,task,today);
-          const saved=JSON.parse(localStorage.getItem(key)||'{}');
-          if(saved.checked){ check.checked=true; label.classList.add('line-through','opacity-70'); }
-          if(saved.note) note.value=saved.note;
-          check.addEventListener('change',()=>{
-            const data=JSON.parse(localStorage.getItem(key)||'{}');
-            data.checked=check.checked;
-            localStorage.setItem(key,JSON.stringify(data));
-            label.classList.toggle('line-through',check.checked);
-            label.classList.toggle('opacity-70',check.checked);
-          });
-          note.addEventListener('change',()=>{
-            const data=JSON.parse(localStorage.getItem(key)||'{}');
-            data.note=note.value.trim();
-            localStorage.setItem(key,JSON.stringify(data));
-          });
-          div.appendChild(check); div.appendChild(label); div.appendChild(note);
-          taskContainer.appendChild(div);
-        });
-      } else {
-        const header=document.createElement('div');
-        header.className='grid grid-cols-7 gap-1 text-center text-xs text-gray-400';
-        days.forEach((d,i)=>{
-          const span=document.createElement('span');
-          span.textContent=d.toLocaleDateString('en-US',{weekday:'short'});
-          if(fmt(d)===todayStr) span.classList.add('text-gray-100');
-          header.appendChild(span);
-        });
-        taskContainer.appendChild(header);
-        cat.tasks.forEach(task=>{
-          const wrapper=document.createElement('div');
-          wrapper.className='space-y-1';
-          const name=document.createElement('div');
-          name.textContent=task;
-          wrapper.appendChild(name);
-          const grid=document.createElement('div');
-          grid.className='grid grid-cols-7 gap-1';
-          days.forEach((d)=>{
-            const cell=document.createElement('div');
-            cell.className='flex flex-col items-center space-y-1';
-            const check=document.createElement('input');
-            check.type='checkbox';
-            check.className='h-4 w-4 border border-gray-600 rounded bg-black';
-            const note=document.createElement('input');
-            note.type='text';
-            note.placeholder='';
-            note.className='bg-transparent text-gray-400 text-[10px] border-b border-gray-700 w-full focus:outline-none';
-            const key=keyFor(cat.name,task,fmt(d));
-            const saved=JSON.parse(localStorage.getItem(key)||'{}');
-            if(saved.checked) check.checked=true;
-            if(saved.note) note.value=saved.note;
-            check.addEventListener('change',()=>{
-              const data=JSON.parse(localStorage.getItem(key)||'{}');
-              data.checked=check.checked;
-              localStorage.setItem(key,JSON.stringify(data));
-            });
-            note.addEventListener('change',()=>{
-              const data=JSON.parse(localStorage.getItem(key)||'{}');
-              data.note=note.value.trim();
-              localStorage.setItem(key,JSON.stringify(data));
-            });
-            cell.appendChild(check); cell.appendChild(note);
-            grid.appendChild(cell);
-          });
-          wrapper.appendChild(grid);
-          taskContainer.appendChild(wrapper);
-        });
-      }
+    const addLog = () => {
+      const text=textInput.value.trim();
+      if(!text) return;
+      const logs=loadLogs();
+      logs.push({id:Date.now(), date:new Date().toISOString().slice(0,10), time:Date.now(), category:catSelect.value, text});
+      saveLogs(logs); textInput.value=''; renderLogs();
     };
-
-    dailyBtn.addEventListener('click',()=>{
-      view='daily';
-      dailyBtn.setAttribute('aria-pressed','true');
-      weeklyBtn.removeAttribute('aria-pressed');
-      renderTasks();
-    });
-    weeklyBtn.addEventListener('click',()=>{
-      view='weekly';
-      weeklyBtn.setAttribute('aria-pressed','true');
-      dailyBtn.removeAttribute('aria-pressed');
-      renderTasks();
-    });
-
-    renderCategories();
+    const removeLog = id => {
+      const logs=loadLogs().filter(l=>l.id!==id); saveLogs(logs); renderLogs();
+    };
+    document.getElementById('add-log').addEventListener('click', addLog);
+    renderFilters();
+    renderLogs();
   </script>
 </BaseLayout>
