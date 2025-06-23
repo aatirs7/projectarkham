@@ -1,0 +1,98 @@
+---
+---
+<div id="onboarding">
+  <div id="onboard-quote" class="onboard-screen hidden opacity-0">
+    <p id="quote-text" class="italic mb-4"></p>
+    <button id="quote-next" class="neon-border px-3 py-1 hover:neon-glow" data-action="next">Continue</button>
+  </div>
+  <div id="tip-one" class="onboard-screen hidden opacity-0">
+    <h2 class="text-xl mb-4">Morning Priming</h2>
+    <p class="mb-6">Sit still, close your eyes, and visualize your goals already achieved. Feel the emotions. Set the tone for the day.</p>
+    <button id="priming-complete" class="neon-border px-3 py-1 hover:neon-glow" data-action="next">Complete</button>
+  </div>
+  <div id="tip-two" class="onboard-screen hidden opacity-0">
+    <h2 class="text-xl mb-4">Mental Declutter</h2>
+    <p class="mb-4">Journal for 5 minutes: dump your thoughts, fears, or ideas. It clears the fog so you can think clearly.</p>
+    <textarea id="journal-input" class="bg-transparent neon-border p-2 w-full max-w-md h-32 text-gray-100 focus:outline-none caret-white"></textarea>
+    <button id="journal-log" class="neon-border px-3 py-1 hover:neon-glow mt-4">Log</button>
+    <button id="journal-complete" class="neon-border px-3 py-1 hover:neon-glow mt-4 hidden" data-action="next">Complete</button>
+  </div>
+  <div id="tip-three" class="onboard-screen hidden opacity-0">
+    <h2 class="text-xl mb-4">Self-Talk Reset</h2>
+    <p class="mb-6">Say 3 powerful affirmations out loud. Your brain believes what it hears often—make sure it’s something strong.</p>
+    <button id="selftalk-complete" class="neon-border px-3 py-1 hover:neon-glow" data-action="next">Complete</button>
+  </div>
+</div>
+<style>
+  #onboarding .onboard-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: black;
+    color: #d1d5db;
+    padding: 1rem;
+    transition: opacity 0.5s;
+  }
+</style>
+<script>
+  (function(){
+    const onboarding=document.getElementById('onboarding');
+    if(!onboarding) return;
+    const screens=Array.from(onboarding.querySelectorAll('.onboard-screen'));
+    const quotes=[
+      'Discipline is the bridge between goals and accomplishment.',
+      'Suffer the pain of discipline or suffer the pain of regret.',
+      'We are what we repeatedly do.',
+      'The only easy day was yesterday.'
+    ];
+    let step=-1; let timer; let journalLogged=false;
+    const show=i=>{const s=screens[i];s.classList.remove('hidden');setTimeout(()=>s.classList.remove('opacity-0'),20);};
+    const hide=i=>{const s=screens[i];s.classList.add('opacity-0');setTimeout(()=>s.classList.add('hidden'),500);};
+    const start=()=>next();
+    const next=()=>{
+      if(step>=0) hide(step);
+      step++;
+      if(step<screens.length){
+        show(step);
+        if(step===0){
+          onboarding.querySelector('#quote-text').textContent=quotes[Math.floor(Math.random()*quotes.length)];
+          timer=setTimeout(next,5000);
+        }
+      }else{
+        onboarding.remove();
+      }
+    };
+    const saveJournal=()=>{
+      if(journalLogged) return; journalLogged=true;
+      const txt=document.getElementById('journal-input').value.trim();
+      if(!txt) return;
+      const key='arkhamJournalEntries';
+      const data=JSON.parse(localStorage.getItem(key)||'[]');
+      data.push({id:Date.now(),date:new Date().toISOString().slice(0,10),text:txt});
+      localStorage.setItem(key,JSON.stringify(data));
+    };
+    document.getElementById('quote-next').addEventListener('click',()=>{clearTimeout(timer);next();});
+    document.getElementById('priming-complete').addEventListener('click',next);
+    const journalInput=document.getElementById('journal-input');
+    const showJournalComplete=()=>{
+      document.getElementById('journal-log').classList.add('hidden');
+      document.getElementById('journal-complete').classList.remove('hidden');
+    };
+    let typingTimer;
+    journalInput.addEventListener('input',()=>{
+      if(journalInput.value.trim()){
+        clearTimeout(typingTimer); typingTimer=setTimeout(showJournalComplete,1000);
+      }
+    });
+    document.getElementById('journal-log').addEventListener('click',()=>{saveJournal();showJournalComplete();});
+    document.getElementById('journal-complete').addEventListener('click',()=>{saveJournal();next();});
+    document.getElementById('selftalk-complete').addEventListener('click',next);
+    window.addEventListener('arkham-access-granted', start);
+    if(sessionStorage.getItem('arkhamAccess')==='1'){start();}
+  })();
+</script>

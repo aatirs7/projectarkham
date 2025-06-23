@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import IntroOverlay from '../components/IntroOverlay.astro';
+import OnboardingFlow from '../components/OnboardingFlow.astro';
 import PasswordGate from '../components/PasswordGate.astro';
 ---
 <html lang="en" class="dark">
@@ -14,7 +14,7 @@ import PasswordGate from '../components/PasswordGate.astro';
   </head>
   <body class="bg-black text-gray-100 font-jetbrains min-h-screen overflow-x-hidden">
     <PasswordGate />
-    <IntroOverlay />
+    <OnboardingFlow />
     <slot />
   </body>
 </html>
